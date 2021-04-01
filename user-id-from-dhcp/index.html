@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>PAN-OS User-ID from DHCP</h1>
+This is for when there is no usable method to map users to IP addresses, or when you want something simple for your home or non-production network. MAC addresses and hostnames can be useful identifiers, which persist across IP address changes. For this method to work, the PAN-OS device needs to be the DHCP server, as it forwards the DHCP logs back to its management interface, and parses out the MAC address/hostname to be used as the "user" in the User-ID table. A user wanted to use the idea of presenting MAC addresses or hostnames as User-ID mappings in a non-production environment, and the CLI commands I gave them seemed useful to share.<br>
+Note: There is a skillet for this (https://github.com/scotchoaf/UserIDskillet), but the user didn't want to stand-up something to run Panhandler, and just wanted the CLI configuration commands.<br>
+Use your own values for <zone-name> (the zone facing the devices/users, as you'll need User-ID enabled on this zone), and <firewall-mgmt-ip> (the PAN-OS device's management IP address):<br>
+<br>
+set zone <zone-name> enable-user-identification yes<br>
+set user-id-collector setting enable-mapping-timeout no<br>
+set deviceconfig system service disable-userid-syslog-listener-udp no<br>
+set shared log-settings syslog mgmt-interface server mgmt-intf transport UDP port 514 format BSD facility LOG_USER server <mgmt-ip><br>
+set shared log-settings system match-list dhcp-log-match filter "(eventid eq lease-start)"<br>
+set user-id-collector syslog-parse-profile paloalto-dhcp regex-identifier event-regex "DHCP\ lease\ started"<br>
+set user-id-collector syslog-parse-profile paloalto-dhcp regex-identifier username-regex "hostname ([a-zA-Z0-9\_\[\]\-]+)"<br>
+set user-id-collector syslog-parse-profile paloalto-dhcp regex-identifier address-regex "ip ([A-F0-9a-f:.]+)"<br>
+set user-id-collector server-monitor mgmt-interface syslog syslog-parse-profile paloalto-dhcp event-type login<br>
+set user-id-collector server-monitor mgmt-interface syslog address <firewall-mgmt-ip> connection-type udp<br>
+<br>
+In the list of commands above, the line:<br>
+<br>
+set user-id-collector syslog-parse-profile paloalto-dhcp regex-identifier username-regex "hostname ([a-zA-Z0-9\_\[\]\-]+)"<br>
+<br>
+could also be replaced with:<br>
+<br>
+set user-id-collector syslog-parse-profile paloalto-dhcp regex-identifier username-regex "mac ([a-fA-F0-9:]+)"<br>
+<br>
+or:<br>
+<br>
+set user-id-collector syslog-parse-profile paloalto-dhcp regex-identifier username-regex "mac ([a-zA-Z0-9:\ \-]+)"<br>
+<br>
+The first option pulls the DHCP registered hostname to be used in User-ID, but note that some devices will not supply one, leading to empty values.<br>
+The second option pulls just the MAC address.<br>
+The third option crudely pulls the MAC address *and* the hostname e.g. aa:bb:cc:dd:11:22 - hostname google-home-mini, and this is what the customer used, as the combination of both was the most useful to them.<br>
+</body>
+</html>
