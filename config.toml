@@ -5,3 +5,4 @@ copyright = "Copyright © 2000–2021, James Holland; all rights reserved."
 languageCode = "en"
 DefaultContentLanguage = "en"
 enableInlineShortcodes = true
+theme = ["github.com/theNewDynamic/gohugo-theme-ananke"]
