@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>PAN-OS TLS Protocol Settings - Ciphers, Key Exchange Algorithms and more</h1>
+Folks have asked to address the use of certain TLS ciphers within PAN-OS, especially those declared as weak by vulnerability scanners or testing suites. There is a KB article describing how to do this here: https://knowledgebase.paloaltonetworks.com/KCSArticleDetail?id=kA10g000000CmqeCAC<br>
+<br>
+The settings to control the TLS protocol are held with the TLS/SSL Profile, and are in the CLI only (as of PAN-OS 9.1 at time of writing) and hence are easily overlooked by only checking the web-based GUI. The TLS protocol settings therefore apply anywhere where a TLS/SSL Profile is used, such as the GlobalProtect Portal and Gateway, and the PAN-OS web-based GUI.<br>
+<br>
+An easy win when using SSL Labs popular testing suite (https://www.ssllabs.com/ssltest/) is the following:<br>
+<br>
+On an NGFW:<br>
+<br>
+set shared ssl-tls-service-profile <ssl-tls-profile-name> protocol-settings auth-algo-sha1 no<br>
+set shared ssl-tls-service-profile <ssl-tls-profile-name> protocol-settings keyxchg-algo-rsa no<br>
+    <br>
+On Panorama:<br>
+<br>
+set template <template-name> config shared ssl-tls-service-profile <ssl-tls-profile-name> protocol-settings auth-algo-sha1 no<br>
+set template <template-name> config shared ssl-tls-service-profile <ssl-tls-profile-name> protocol-settings keyxchg-algo-rsa no<br>
+    <br>
+The commands above will take the results in SSL Labs from B with lots of weak cipher messages... to A- with no weak cipher messages:<br>
+This was enough for the organisations I was working with in terms of compliance and security. Further ciphers could be disabled to increase the score given by testing suites, but one must also test that all their clients can still connect with their browsers and devices, noting that older browser and devices may not support newer or more complicated ciphers.
+</body>
+</html>

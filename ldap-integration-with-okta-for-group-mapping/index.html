@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>PAN-OS LDAP Integration with Okta for Group Mapping</h1>
+Okta can be queried for group mapping information using LDAP. At the time of writing, the Okta documentation is here: Connecting to Okta using the LDAP Interface​. Configuration settings in this post were all tested and working with PAN-OS 9.0.2 and Okta's production admin GUI on 8th July 2019.<br>
+<br>
+The Okta "LDAP Interface" is enabled in the Okta admin GUI from Directory -> Directory Integrations -> Add LDAP Interface. Once enabled, connection settings are presented to the administrator.<br>
+<br>
+Server/Host: {{org-subdomain>.ldap.okta.com<br>
+Port: tcp/636 using LDAPS<br>
+Base DN: dc={{org-subdomain}}, dc=okta, dc=com<br>
+User Base DN: ou=users, dc={{org-subdomain}}, dc=okta, dc=com<br>
+Group Base DN: ou=groups, dc={{org-subdomain}}, dc=okta, dc=com<br>
+Bind DN: uid={{read-only-admin-account}}, dc={{org-subdomain}}, dc=okta, dc=com<br>
+Bind Password: Password for {{read-only-admin-account><br>
+    <br>
+The {{org-subdomain}} comes from your tenant (if you connect to example.okta.com then your LDAP host is example.ldap.okta.com). Note that your tenant may not be on okta.com, but instead be on another domain such as oktapreview.com or okta-emea.com, so amend accordingly.<br>
+<br>
+The {{read-only-admin-account}} is an account which must be designated at least "Read Only Administrator" privileges in order to perform an LDAP bind. Go to Security -> Administrators in the Okta admin GUI to manage account administrative privileges.<br>
+<br>
+When configuring an LDAP Server Profile in PAN-OS, the following configuration gives direction to your Okta tenant, using the settings listed above:<br>
+<br>
+<img src="01.png"><br>
+<br>
+When configuring User-ID Group Mapping in PAN-OS, using the LDAP Server Profile configured in the previous step, the following configuration will retrieve group membership from Okta:<br>
+<br>
+Group Objects -> Object Class: groupofUniqueNames<br>
+User Objects -> Object Class: inetOrgPerson<br>
+User Attributes -> Primary Username: uid<br>
+User Attributes -> Email: mail<br>
+Group Attributes -> Group Member: uniqueMember<br>
+<br>
+<img src="02.png"><br>
+<img src="03.png"><br>
+<br>
+The following PAN-OS CLI commands are useful during testing.<br>
+<br>
+Refresh the group mapping, after making changes to PAN-OS config or after amending users and group membership in the directory:<br>
+<br>
+debug user-id refresh group-mapping all<br>
+debug user-id refresh group-mapping group-mapping-name "cn={{group-name}},ou=groups,dc={{org-subdomain}},dc=okta,dc=com"<br>
+<br>
+List all the groups ingested by PAN-OS:<br>
+<br>
+show user group list<br>
+<br>
+List the members of a group:<br>
+<br>
+show user group name "cn={{group-name}},ou=groups,dc={{org-subdomain}},dc=okta,dc=com"
+</body>
+</html>
