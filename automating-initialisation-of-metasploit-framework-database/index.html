@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>Automating the Initialisation of the Metasploit Framework Database</h1>
+I've been working on a project which calls for the automated deployment of a virtual machine, with Metasploit Framework installed and ready to use. The installation of Metasploit Framework on Linux via CLI commands is well documented, and currently looks like this:<br>
+<br>
+curl https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb > msfinstall<br>
+chmod 755 msfinstall<br>
+./msfinstall<br>
+<br>
+After the above commands are executed, the user types msfconsole and goes through a one-time process to initialise the metasploit database:<br>
+<br>
+** Welcome to Metasploit Framework Initial Setup **<br>
+Please answer a few questions to get started.<br>
+Would you like to use and setup a new database (recommended)? yes<br>
+Creating database at /home/jholland/.msf4/db<br>
+Starting database at /home/jholland/.msf4/db...success<br>
+Creating database users<br>
+Creating initial database schema<br>
+** Metasploit Framework Initial Setup Complete **<br>
+<br>
+...and after being shown a list of statistics for the numbers of exploits and paylods available, the user is presented with the console's prompt:<br>
+<br>
+msf ><br>
+<br>
+I wanted to automate this database initialisation so the user goes straight to the console prompt on first use. I didn't see anything in the project documentation to achieve this, so I created an "expect" script to do the job.<br>
+<br>
+#!/usr/bin/expect -f<br>
+<br>
+set force_conservative 0 ;<br>
+if {$force_conservative} {<br>
+set send_slow {1 .1}<br>
+proc send {ignore arg} {<br>
+sleep .1<br>
+exp_send -s -- $arg<br>
+}<br>
+}<br>
+<br>
+set timeout -1<br>
+spawn msfconsole<br>
+match_max 100000<br>
+<br>
+expect -exact "Would you like to use and setup a new database (recommended)? "<br>
+send -- "yes\r"<br>
+expect ">"<br>
+send -- "exit\r"<br>
+expect eof<br>
+<br>
+You can find the latest version of the script here: https://github.com/jamesholland-uk/scripts/blob/master/metasploit-initialise-db.sh<br>
+<br>
+11 Jan 2019 - EDIT: Metasploit Framework 5.0 was released yesterday. An updated script can be found here: https://github.com/jamesholland-uk/scripts/blob/master/metasploit-v5-initialise-db.sh<br>
+<br>
+Executing the installation commands and the "expect" script as part of the build of the Linux virtual machine means the user will go straight into the console without having to do the initialisation steps.<br>
+<br>
+Note that for multi-user systems, the expect script should be run under the context of the target user, for example:<br>
+<br>
+su -c "./metasploit-initialise-db.sh" -s /bin/sh johnsmith<br>
+<br>
+<br>
+--- <a href=https://jamesholland.me.uk>home</a> --- <a href=https://twitter.com/jamesholland_uk>twitter</a> --- <a href=https://www.linkedin.com/in/hollandj>linkedin</a> ---
+<br>
+</body>
+</html>
