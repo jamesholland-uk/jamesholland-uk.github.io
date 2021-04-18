@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>Activating and Deactivating Auth Codes for PAN-OS via API</h1>
+One the benefits of Palo Alto Networks' VM-Series is that licences can be moved between deployment scenarios; from private cloud to public cloud, between different public cloud providers, and many other scenarios. The process for this requires activation and deactivation of licences. This article describes the steps to activate and deactivate licence auth codes using the PAN-OS API. This is useful for programmatically provisioning VM-Series via scripting or automation toolsets. Details are correct as of PAN-OS 8.1.3, and whilst the examples shown are for a VM-Series running in Microsoft Azure, they should be generally applicable to other deployment scenarios.<br>
+<br>
+Note: replace all {{variables}} with your own values.<br>
+<br>
+In the Customer Support Portal we have an auth code for VM-300 with no VM-Series provisioned:<br>
+Screen-Shot-2018-08-03-at-10.44.37-1<br>
+<br>
+The VM-Series virtual appliance is currently unlicensed:<br>
+Screen-Shot-2018-08-03-at-10.49.36-1<br>
+<br>
+The VM-Series therefore also has no serial number:<br>
+Screen-Shot-2018-08-03-at-10.49.26-1<br>
+<br>
+The following API call installs the auth code on the VM-Series:<br>
+<br>
+https://{{vm-series-hostname-or-ip}}/api/?type=op&cmd=&lt;request&gt;&lt;license&gt;&lt;install&gt;license-authcode&lt;/install&gt;&lt;/license&gt;&lt;/request&gt;&key={{vm-series-api-key}}<br>
+<br>
+The expected response is:<br>
+<br>
+VM Device License installed. Restarting pan services.<br>
+Screen-Shot-2018-08-03-at-11.00.11-1<br>
+<br>
+Following the activation, the Customer Support Portal should show a VM-Series has been provisioned:<br>
+Screen-Shot-2018-08-03-at-11.02.31<br>
+<br>
+The VM-Series is now licensed:<br>
+Screen-Shot-2018-08-03-at-11.03.53<br>
+<br>
+The VM-Series also now has a serial number:<br>
+Screen-Shot-2018-08-03-at-11.03.46<br>
+<br>
+The VM-Series is now ready for use.<br>
+<br>
+To decommission the VM-Series and release the licence, a licence deactivation API key is required. This can be obtained from the Customer Support Portal, go to Assets->Licensing API:<br>
+Screen-Shot-2018-08-03-at-11.11.28<br>
+<br>
+The following API call installs the licence deactivation API key on the VM-Series:<br>
+<br>
+https://{{vm-series-hostname-or-ip}}/api/?type=op&cmd=&lt;request&gt;&lt;license&gt;&lt;api-key&gt;&lt;set&gt;&lt;key&gt;license-deactivation-api-key&lt;/key&gt;&lt;/set&gt;&lt;/api-key&gt;&lt;/license&gt;&lt;/request&gt;&key={{vm-series-api-key}}<br>
+<br>
+The expected response is:<br>
+<br>
+API Key is successfully set<br>
+Screen-Shot-2018-08-03-at-11.10.28<br>
+<br>
+The next API call deactivates the VM-Series licenses:<br>
+<br>
+https://{{vm-series-hostname-or-ip}}/api/?type=op&cmd=&lt;request&gt;&lt;license&gt;&lt;deactivate&gt;&lt;VM-Capacity&gt;&lt;mode&gt;auto&lt;/mode&gt;&lt;/VM-Capacity&gt;&lt;/deactivate&gt;&lt;/license&gt;&lt;/request&gt;&key={{vm-series-api-key}}<br>
+<br>
+The expected response is:<br>
+<br>
+serial-number Success<br>
+serial-number Success<br>
+serial-number Success<br>
+serial-number Success<br>
+serial-number Success<br>
+Successfully deactivated old keys.<br>
+Screen-Shot-2018-08-03-at-11.13.04<br>
+<br>
+Note that the number of lines within the response showing successful licence deactivation will depend on the number of feature licences activated on the VM-Series.<br>
+<br>
+The VM-Series is not successfully deactivated. The Customer Support Portal will also update to show a VM-Series has be de-provisioned:<br>
+Screen-Shot-2018-08-03-at-11.15.00<br>
+<br>
+<br>
+--- <a href=https://jamesholland.me.uk>home</a> --- <a href=https://twitter.com/jamesholland_uk>twitter</a> --- <a href=https://www.linkedin.com/in/hollandj>linkedin</a> ---
+<br>
+</body>
+</html>
