@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WBA Ticket Sales</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c;
+        }
+        .container {
+            max-width: 90%;
+            margin: auto;
+            padding: 1rem;
+        }
+        .passed {
+            opacity: 0.4;
+            filter: blur(0.5px);
+            transition: opacity 0.3s ease-in-out;
+        }
+        .highlight {
+            background-color: #f7931e;
+            color: white;
+            font-weight: 600;
+        }
+        .highlight-general {
+            background-color: #8c2d19;
+            color: white;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100">
+
+    <div class="container p-4 md:p-8">
+        <header class="text-center my-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">West Bromwich Albion</h1>
+            <h2 class="text-xl md:text-2xl text-gray-400">25/26 Home Ticket Sale Dates</h2>
+        </header>
+
+        <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 mb-8">
+            <button id="memberButton" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-full transition-colors duration-200 shadow-lg">
+                Member View
+            </button>
+            <button id="generalButton" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-full transition-colors duration-200 shadow-lg">
+                General Sale View
+            </button>
+        </div>
+
+        <div class="overflow-x-auto bg-gray-800 rounded-lg shadow-xl p-4 md:p-6">
+            <table class="min-w-full divide-y divide-gray-700">
+                <thead class="bg-gray-700">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                            Match
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                            Date
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                            Kick-Off
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sale-header" data-sale-type="member">
+                            STH/Members Online
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                            Member Phone/In Person
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sale-header" data-sale-type="general">
+                            General Sale
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="fixtureTableBody" class="divide-y divide-gray-700">
+                    <!-- Fixture rows will be injected here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <footer class="mt-8 text-center text-gray-500 text-sm">
+            <p>Data based on the 25/26 Home Ticket Sale Dates document.</p>
+        </footer>
+    </div>
+
+    <script>
+        const fixtures = [
+            { opponent: "BLACKBURN ROVERS", matchDate: "Sat Aug 9 2025", kickOff: "15.00", memberOnline: "Mon Jul 21 2025", memberAll: "Wed Jul 23 2025", general: "Mon Jul 28 2025" },
+            { opponent: "PORTSMOUTH", matchDate: "Sat Aug 23 2025", kickOff: "15.00", memberOnline: "Mon Jul 21 2025", memberAll: "Wed Jul 23 2025", general: "Mon Jul 28 2025" },
+            { opponent: "DERBY COUNTY", matchDate: "Sat Sep 13 2025", kickOff: "15.00", memberOnline: "Mon Aug 11 2025", memberAll: "Wed Aug 13 2025", general: "Mon Sep 1 2025" },
+            { opponent: "LEICESTER CITY", matchDate: "Fri Sep 26 2025", kickOff: "20.00", memberOnline: "Mon Aug 25 2025", memberAll: "Wed Aug 27 2025", general: "Mon Sep 8 2025" },
+            { opponent: "PRESTON NORTH END", matchDate: "Sat Oct 18 2025", kickOff: "15.00", memberOnline: "Mon Sep 22 2025", memberAll: "Wed Sep 24 2025", general: "Mon Sep 29 2025" },
+            { opponent: "SHEFFIELD WEDNESDAY", matchDate: "Sat Nov 1 2025", kickOff: "15.00", memberOnline: "Mon Sep 29 2025", memberAll: "Wed Oct 1 2025", general: "Mon Oct 13 2025" },
+            { opponent: "OXFORD UNITED", matchDate: "Sat Nov 8 2025", kickOff: "15.00", memberOnline: "Mon Oct 6 2025", memberAll: "Wed Oct 8 2025", general: "Mon Oct 20 2025" },
+            { opponent: "BIRMINGHAM CITY", matchDate: "Wed Nov 26 2025", kickOff: "19.45", memberOnline: "Mon Oct 27 2025", memberAll: "Wed Oct 29 2025", general: "Mon Nov 10 2025" },
+            { opponent: "SWANSEA CITY", matchDate: "Sat Nov 29 2025", kickOff: "15.00", memberOnline: "Mon Oct 27 2025", memberAll: "Wed Oct 29 2025", general: "Mon Nov 10 2025" },
+            { opponent: "SHEFFIELD UNITED", matchDate: "Sat Dec 13 2025", kickOff: "15.00", memberOnline: "Mon Nov 10 2025", memberAll: "Wed Nov 12 2025", general: "Mon Nov 24 2025" },
+            { opponent: "BRISTOL CITY", matchDate: "Fri Dec 26 2025", kickOff: "15.00", memberOnline: "Mon Nov 17 2025", memberAll: "Wed Nov 19 2025", general: "Mon Dec 8 2025" },
+            { opponent: "QUEENS PARK RANGERS", matchDate: "Mon Dec 29 2025", kickOff: "15.00", memberOnline: "Mon Nov 17 2025", memberAll: "Wed Nov 19 2025", general: "Mon Dec 8 2025" },
+            { opponent: "MIDDLESBROUGH", matchDate: "Sat Jan 17 2026", kickOff: "15.00", memberOnline: "Mon Dec 15 2025", memberAll: "Wed Dec 17 2025", general: "Mon Dec 29 2025" },
+            { opponent: "NORWICH CITY", matchDate: "Tue Jan 20 2026", kickOff: "19.45", memberOnline: "Mon Dec 15 2025", memberAll: "Wed Dec 17 2025", general: "Mon Jan 5 2026" },
+            { opponent: "STOKE CITY", matchDate: "Sat Feb 7 2026", kickOff: "15.00", memberOnline: "Mon Jan 5 2026", memberAll: "Wed Jan 7 2026", general: "Mon Jan 19 2026" },
+            { opponent: "COVENTRY CITY", matchDate: "Sat Feb 21 2026", kickOff: "15.00", memberOnline: "Mon Jan 19 2026", memberAll: "Wed Jan 21 2026", general: "Mon Feb 2 2026" },
+            { opponent: "CHARLTON ATHLETIC", matchDate: "Tue Feb 24 2026", kickOff: "19.45", memberOnline: "Mon Jan 19 2026", memberAll: "Wed Jan 21 2026", general: "Mon Feb 2 2026" },
+            { opponent: "SOUTHAMPTON", matchDate: "Wed Mar 11 2026", kickOff: "19.45", memberOnline: "Mon Feb 9 2026", memberAll: "Wed Feb 11 2026", general: "Mon Feb 23 2026" },
+            { opponent: "HULL CITY", matchDate: "Sat Mar 14 2026", kickOff: "15.00", memberOnline: "Mon Feb 9 2026", memberAll: "Wed Feb 11 2026", general: "Mon Feb 23 2026" },
+            { opponent: "WREXHAM", matchDate: "Fri Apr 3 2026", kickOff: "15.00", memberOnline: "Mon Mar 2 2026", memberAll: "Wed Mar 4 2026", general: "Mon Mar 16 2026" },
+            { opponent: "MILLWALL", matchDate: "Sat Apr 11 2026", kickOff: "15.00", memberOnline: "Mon Mar 9 2026", memberAll: "Wed Mar 11 2026", general: "Mon Mar 23 2026" },
+            { opponent: "WATFORD", matchDate: "Tue Apr 21 2026", kickOff: "19.45", memberOnline: "Mon Mar 16 2026", memberAll: "Wed Mar 18 2026", general: "Tue Apr 7 2026" },
+            { opponent: "IPSWICH TOWN", matchDate: "Sat Apr 25 2026", kickOff: "15.00", memberOnline: "Mon Mar 16 2026", memberAll: "Wed Mar 18 2026", general: "Mon/Tue 7 2026" }
+        ];
+
+        const tableBody = document.getElementById('fixtureTableBody');
+        const memberButton = document.getElementById('memberButton');
+        const generalButton = document.getElementById('generalButton');
+
+        let isMemberView = true;
+
+        // Function to create and render the table rows
+        const renderTable = () => {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            fixtures.forEach(fixture => {
+                const matchDate = new Date(fixture.matchDate);
+                const memberSaleDate1 = new Date(fixture.memberOnline);
+                const generalSaleDate = new Date(fixture.general.replace('Mon/Tue', 'Mon'));
+
+                const row = document.createElement('tr');
+                let rowClass = matchDate < today ? 'passed' : 'bg-gray-800 hover:bg-gray-700 transition-colors duration-200';
+                row.className = rowClass;
+
+                // Create and append cells
+                const opponentCell = document.createElement('td');
+                opponentCell.className = 'px-6 py-4 whitespace-nowrap font-medium text-gray-200';
+                opponentCell.textContent = fixture.opponent;
+
+                const matchDateCell = document.createElement('td');
+                matchDateCell.className = 'px-6 py-4 whitespace-nowrap text-gray-300';
+                matchDateCell.textContent = fixture.matchDate.replace('2025', '').replace('2026', '');
+
+                const kickOffCell = document.createElement('td');
+                kickOffCell.className = 'px-6 py-4 whitespace-nowrap text-gray-300';
+                kickOffCell.textContent = fixture.kickOff;
+
+                const memberOnlineCell = document.createElement('td');
+                memberOnlineCell.className = 'px-6 py-4 whitespace-nowrap';
+                memberOnlineCell.textContent = fixture.memberOnline.replace('2025', '').replace('2026', '');
+                
+                const memberAllCell = document.createElement('td');
+                memberAllCell.className = 'px-6 py-4 whitespace-nowrap';
+                memberAllCell.textContent = fixture.memberAll.replace('2025', '').replace('2026', '');
+
+                const generalSaleCell = document.createElement('td');
+                generalSaleCell.className = 'px-6 py-4 whitespace-nowrap';
+                generalSaleCell.textContent = fixture.general.replace('2025', '').replace('2026', '');
+
+                // Highlighting logic
+                if (!rowClass.includes('passed')) {
+                    if (isMemberView) {
+                        // Highlight if member sale has started and match date hasn't passed
+                        if (today >= memberSaleDate1 && today < matchDate) {
+                            memberOnlineCell.classList.add('highlight');
+                            memberAllCell.classList.add('highlight');
+                            // Also highlight the general sale date as members can also purchase during this time
+                            generalSaleCell.classList.add('highlight');
+                        }
+                    } else { // General view
+                        if (today >= generalSaleDate && today < matchDate) {
+                            generalSaleCell.classList.add('highlight-general');
+                        }
+                    }
+                }
+
+                row.appendChild(opponentCell);
+                row.appendChild(matchDateCell);
+                row.appendChild(kickOffCell);
+                row.appendChild(memberOnlineCell);
+                row.appendChild(memberAllCell);
+                row.appendChild(generalSaleCell);
+
+                tableBody.appendChild(row);
+            });
+        };
+
+        // Event listeners for the buttons
+        memberButton.addEventListener('click', () => {
+            isMemberView = true;
+            renderTable();
+        });
+
+        generalButton.addEventListener('click', () => {
+            isMemberView = false;
+            renderTable();
+        });
+
+        // Initial render
+        renderTable();
+
+    </script>
+</body>
+</html>
